@@ -216,7 +216,7 @@ public class Http {
 
         public String asString() {
             byte[] bytes = asBytes();
-            return (null != bytes) ? new String(asBytes()) : null;
+            return (null != bytes) ? new String(bytes) : null;
         }
 
         public <T> T map(ResponseMapper<T> mapper) {
