@@ -1,0 +1,17 @@
+# Java
+*.class
+
+# Log
+*.log
+
+# IntelliJ
+*.iml
+*.iws
+out/
+.idea/
+
+# Project specific
+samples/
+
+# OSX
+.DS_Store
