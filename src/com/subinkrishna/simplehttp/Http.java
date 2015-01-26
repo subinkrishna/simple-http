@@ -178,9 +178,8 @@ public class Http {
                 int redirectCount = 0;
                 while (mDoRedirect &&
                        (++redirectCount <= MAX_REDIRECTIONS) &&
-                       (3 == connection.getResponseCode() / 100) &&
+                       (3 == (connection.getResponseCode() / 100)) &&
                        (null != (location = connection.getHeaderField("Location")))) {
-                    // Verbose
                     response = Response.from(connection);
                     log(response);
                     log(String.format("\nRedirect #%d (%s)", redirectCount, location));
@@ -216,7 +215,8 @@ public class Http {
         }
 
         public String asString() {
-            return new String(asBytes());
+            byte[] bytes = asBytes();
+            return (null != bytes) ? new String(asBytes()) : null;
         }
 
         public <T> T map(ResponseMapper<T> mapper) {
@@ -248,6 +248,7 @@ public class Http {
                 log(String.format("HTTP %s %s", requestType.toString(), urlString));
 
                 connection = (HttpURLConnection) new URL(urlString).openConnection();
+                connection.setDoInput(true);
                 connection.setRequestMethod(requestType.toString());
                 connection.setInstanceFollowRedirects(redirect);
 
@@ -274,24 +275,29 @@ public class Http {
 
         public static Response from(HttpURLConnection connection) {
             Response response = null;
-            ByteArrayOutputStream out = null;
+            ByteArrayOutputStream to = null;
 
             if (null != connection) {
                 try {
                     // Read data
-                    out = new ByteArrayOutputStream();
-                    copy(connection.getInputStream(), out, true);
+                    to = new ByteArrayOutputStream();
 
                     // Build response
                     response = new Response();
                     response.mResponseCode = connection.getResponseCode();
                     response.mResponseHeaders = connection.getHeaderFields();
                     response.mResponseMessage = connection.getResponseMessage();
-                    response.mBody = out.toByteArray();
+
+                    // Switch streams based on response code
+                    InputStream from = (4 == (response.mResponseCode / 100))
+                            ? connection.getErrorStream()
+                            : connection.getInputStream();
+                    copy(from, to, true);
+                    response.mBody = to.toByteArray();
                 } catch (Throwable e) {
                     throwIt(e);
                 } finally {
-                    out = null;
+                    to = null;
                     connection.disconnect();
                 }
             }

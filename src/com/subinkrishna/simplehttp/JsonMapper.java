@@ -18,9 +18,11 @@ public class JsonMapper<T> implements ResponseMapper<T> {
     @Override
     public T map(Http.Response response) {
         T result = null;
-        if (null != response) {
+        String json = null;
+        if ((null != response) &&
+            (null != response.mBody)) {
             Gson gson = new Gson();
-            String json = new String(response.mBody);
+            json = new String(response.mBody);
             result = gson.fromJson(json, mType);
         }
         return result;
