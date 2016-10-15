@@ -1,4 +1,4 @@
-# simple-http
+# [DEPRECATED] simple-http
 A WIP simple basic HTTP library 
 
 **Usage**
